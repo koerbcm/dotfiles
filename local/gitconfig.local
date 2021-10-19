@@ -1,0 +1,302 @@
+[user]
+  email = chris.koerber@developm3nt.com
+  name = Chris Koerber
+  color = auto
+
+[includeIf "gitdir:/Users/ckoerber/workspace/"]
+  path = .gitconfig-work.local
+
+# this might be used to point brew to use ssh
+# [url "git@github.com:"]
+#  insteadOf = https://github.com/
+
+[git]
+  user = koerbcm
+
+[github]
+  user = koerbcm
+
+[color]
+  branch = auto
+  diff = auto
+  interactive = true
+  ui = true
+  pager = true
+
+[color "status"]
+  added = green
+  changed = yellow
+  untracked = red
+
+[color "diff-highlight"]
+  oldNormal = red bold
+  oldHighlight = red bold 52
+  newNormal = green bold
+  newHighlight = green bold 22
+
+[core]
+  #pager = `brew --prefix git`/share/git-core/contrib/diff-highlight/diff-highlight | less -F -X
+  pager = diff-so-fancy | less --tabs=4 -RFX
+  whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+  #editor = env VIM_MINIMAL=1 NVIM_TUI_ENABLE_TRUE_COLOR=1 nvim +startinsert
+  editor = "vim"
+  excludesfile = ~/.gitignore.local
+	ignorecase = false
+  autocrlf = input
+
+[credential]
+  helper = osxkeychain
+
+[commit]
+  template = ~/.gitmessage
+
+[init]
+  defaultBranch = main
+  templatedir = ~/.git_template
+
+[difftool]
+  prompt = true
+
+[browser "gitscm"]
+  cmd = /bin/sh -c 'open https://git-scm.com/docs/$(basename $1 .html)' --
+
+[help]
+  browser = gitscm
+
+[merge]
+  tool = vimdiff
+
+[advice]
+  statusHints = false
+
+[mergetool "vimdiff"]
+  keepBackup = false
+  cmd = vim -d "$LOCAL" "$MERGED" "$REMOTE"
+  trustExitCode = true
+
+[merge "railsschema"]
+  name = newer Rails schema version
+  driver = "ruby -e '\n\
+    system %(git), %(merge-file), %(--marker-size=%L), %(%A), %(%O), %(%B)\n\
+    b = File.read(%(%A))\n\
+    b.sub!(/^<+ .*\\nActiveRecord::Schema\\.define.:version => (\\d+). do\\n=+\\nActiveRecord::Schema\\.define.:version => (\\d+). do\\n>+ .*/) do\n\
+      %(ActiveRecord::Schema.define(:version => #{[$1, $2].max}) do)\n\
+    end\n\
+    File.open(%(%A), %(w)) {|f| f.write(b)}\n\
+    exit 1 if b.include?(%(<)*%L)'"
+
+[apply]
+  whitespace = fix
+  #whitespace = nowarn
+
+[push]
+  default = simple
+
+[web]
+  browser = open
+
+# [branch]
+#  autosetuprebase = always
+# autosetupmerge = always
+
+#[pull]
+#  rebase = preserve
+
+[rebase]
+  autosquash = true
+
+[rerere]
+ enabled = true
+ autoupdate = true
+
+[pager]
+  diff = diff-so-fancy | less --tabs=4 -RFX
+  show = diff-so-fancy | less --tabs=4 -RFX
+  log = diff-so-fancy | less --tab=4 -RFX
+
+[interactive]
+  diffFilter = diff-so-fancy | less --tabs=4 -RFX
+
+[diff]
+  colorMoved = zebra
+  compactionHeuristic = true
+
+[commit]
+  verbose = true
+
+[hooks "pre-commit"]
+  checks = DONTCOMMIT
+	checks = wip
+
+[hooks]
+  checkrubysyntax = true
+
+[remote "upstream"]
+    fetch = +refs/heads/*:refs/remotes/upstream/*
+    fetch = +refs/pull/*/head:refs/remotes/upstream/pr/*
+
+[alias]
+  st = status -sb
+  resetorigin = !git fetch origin && git reset --hard origin/master && git clean -f -d
+  forget = rm --cached
+  ec = config --global -e
+  up = !git pull --prune $@ && git submodule update --init --recursive
+
+  save = !git add -A && git commit -m 'SAVEPOINT'
+  # Moved to script. Look below
+  # wip = !git add -u && git commit -m "WIP"
+  undo = reset HEAD~1 --mixed
+  amend = commit -a --amend
+  wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+  #bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch -d; }; f"
+  bclean = "!f() { git checkout ${1-master} && git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs git branch -d; }; f"
+  bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+  la = "!git config --global -l | grep alias | cut -c 7-"
+
+  assume = update-index --assume-unchanged
+  unassume = update-index --no-assume-unchanged
+  assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+  unassumeall = "!git assumed | xargs git update-index --no-assume-unchanged"
+  assumeall = "!git st -s | awk {'print $2'} | xargs git assume"
+
+  r = reset
+  r1 = reset HEAD^
+  r2 = reset HEAD^^
+  rh = reset --hard
+  rh1 = reset HEAD^ --hard
+  rh2 = reset HEAD^^ --hard
+
+  aa = add --all :/
+  ap = add --patch
+
+  b = "!git for-each-ref --sort='-authordate' --format='%(authordate)%09%(objectname:short)%09%(refname)' refs/heads | sed -e 's-refs/heads/--'"
+  br = branch --sort=-committerdate
+  ba = branch -A
+  bm = branch -m
+  bd = branch -d
+  #bdd = branch -D
+  #git nuke <branchname>
+  #bbd = branch -D $1 && push origin --delete $1
+
+  ci = commit
+  cv = commit -v
+  cm = commit -m
+  ca = commit --amend
+  cane = commit --amend --no-edit
+  cp = commit -p
+  cam = !git add -A && git commit -m
+
+  co = checkout
+  cob = checkout -b
+  com = checkout master
+  cof = "!git checkout master -- $1"
+
+  cl = clone
+
+  # stash
+  sshow = "!f() { git stash show stash^{/$*} -p; }; f"
+  sapply = "!f() { git stash apply stash^{/$*}; }; f"
+
+  #squash doesn't work. git reserved name. Use sq
+  #squash = "!git rebase -i --autosquash $(git merge-base master HEAD)"
+  sq = "!git rebase -i --autosquash $(git merge-base master HEAD)"
+
+  di = diff
+  dc = diff --cached
+  df = diff
+  ds = diff --stat=160,120
+  dl = "!git ll -1"
+  dlc = diff --cached HEAD^
+  dr  = "!f() { git diff "$1"^.."$1"; }; f"
+  diffr  = "!f() { git diff "$1"^.."$1"; }; f"
+  sortdiff = !sh -c 'git diff "$@" | grep "^[+-]" | sort --key=1.2 | uniq -u -s1'
+
+  # Diff but will show patch info
+  patch = !git --no-pager diff --no-color
+
+  mf = merge --ff-only
+  m = merge --no-ff
+  # open rebase/merge conflicted files
+  fix = !sh -c "'vim `git diff --name-only --diff-filter=U`'"
+  # add unmerged files (when conflicts are resolved)
+  au = !sh -c "'git add `git diff --name-only --diff-filter=U`'"
+
+  plf = pull --ff-only
+  plom = pull origin master
+
+  fap = fetch --all --prune
+  fa = fetch --all
+  pom = push origin master
+  pfl = push --force-with-lease
+
+  s = status -sb
+
+  # git submodules
+  subpull = submodule foreach git pull
+
+  sha = name-rev --name-only --refs=refs/heads/*
+  g = grep --break --heading --line-number
+  gi = grep --break --heading --line-number -i
+  tree = log --graph --pretty=oneline --decorate
+  # undo = reset --soft HEAD^
+  # reset = reset --hard HEAD^
+
+  # Divergence (commits we added and commits remote added)
+  div = divergence
+
+  # Goodness (summary of diff lines added/removed/total)
+  gn = goodness
+  gnc = goodness --cached
+
+  # Fancy logging.
+  #   h = head
+  #   hp = head with patch
+  #   r = recent commits, only current branch
+  #   ra = recent commits, all reachable refs
+  #   l = all commits, only current branch
+  #   la = all commits, all reachable refs
+  #   lsha = last commit sha
+
+  lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%Creset' --abbrev-commit
+  ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+  ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+  lc  = "!f() { git ll "$1"^.."$1"; }; f"
+  l = "!. ~/.githelpers && pretty_git_log"
+  la = !git l --all
+  lsha = !git log --max-count=1 | awk '{print $2}' | awk 'NR==1{print $1}'
+  plog = log --graph --pretty=format:'%h -%d %s %n' --abbrev-commit --date=relative --branches
+
+  # Original last
+  # last = log -1 HEAD
+
+  # Print the last commit title & hash
+  last = !git --no-pager log -1 --oneline --color
+  head = !git l -1
+  h = !git head
+  hp = "!. ~/.githelpers && show_git_head"
+  r = !git l -30
+  ra = !git r --all
+
+  count   = !git shortlog -sn
+  this = !git init && git add . && git commit -m \"Initial commit\"
+  who = shortlog -s -n --no-merges
+  standup = shortlog --since=yesterday
+  today = shortlog --since=midnight
+  uncommit = reset --soft HEAD^
+  unamend = reset --soft HEAD@{1}
+  subs = submodule foreach git pull origin master
+  hist = for-each-ref --count=5 --sort=-committerdate --format='%(refname:short)' refs/heads/
+  refresh = !ssh-add -l && STASH=$(git stash) && git fetch && git rebase origin/master && test \"$STASH\" != \"No local changes to save\" && git stash pop
+  setupstream = !git branch --set-upstream-to=origin/`git symbolic-ref --short HEAD`
+
+  # Pop your last commit out of the history! No change lost, just unindexed
+  pop = reset HEAD^
+  # Add a file/directory to your .gitignore
+  ignore = "!f() { echo \"$1\" >> .gitignore; }; f"
+
+# Git Functions
+  sweep   = !$ZSH/bin/git-sweep
+  promote = !$ZSH/bin/git-promote
+  wtf     = !$ZSH/bin/git-wtf
+  rank-contributers = !$ZSH/bin/git-rank-contributers
+  resume  = !$ZSH/bin/git-unwip

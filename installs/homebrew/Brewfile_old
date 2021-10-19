@@ -1,0 +1,157 @@
+#!/bin/sh
+# reviewed and updated 3/4/2020
+# started using small set of brew
+
+cask_args appdir: '/Applications'
+
+tap 'homebrew/cask'
+tap 'homebrew/cask-fonts'
+tap 'homebrew/cask-versions'
+tap 'homebrew/brewdler'
+tap 'homebrew/bundle'
+tap 'homebrew/services'
+tap 'domt4/autoupdate'
+tap 'github/gh'
+# tap 'mongodb/brew'
+tap 'adoptopenjdk/openjdk' # for java 1.8
+
+brew 'coreutils'
+brew 'moreutils'
+brew 'findutils'
+
+# make sure that java is available to do any installs later
+cask 'adoptopenjdk/openjdk/adoptopenjdk8'
+cask 'java' # failed in install
+
+cask '1password'
+# cask 'bettertouchtool' # might use magnet
+# cask 'font-source-code-pro' # failed with install
+# cask 'chromedriver'
+cask 'contexts'
+cask 'firefox'
+cask 'flux'
+cask 'istat-menus' # An advanced system monitor for your menubar
+cask 'phantomjs'
+cask 'keycastr' # KeyCastr, an open-source keystroke visualizer - Think streaming
+cask 'licecap'
+# cask 'sequel-pro'
+# cask 'slack'
+# cask 'the-unarchiver' # The Unarchiver is the only app you need to open RAR on Mac. It’s times more powerful than the native macOS utility and supports infinitely more archive formats
+# cask 'usb-overdrive' # USB Overdrive is a device driver for macOS that handles any USB or Bluetooth mouse, keyboard, trackball, joystick, gamepad or gaming device from any manufacturer and lets you configure it either globally or on a per-application, per-device basis
+cask 'virtualbox'
+# cask 'yubiswitch' # failed on install
+
+# TODO: filling these out using http://searchbrew.com/
+
+brew 'ack' # Search tool like grep, but optimized for programmers
+brew 'ansifilter' # Strip or convert ANSI codes into HTML, (La)Tex, RTF, or BBCode
+brew 'apr-util' # Companion library to apr, the Apache Portable Runtime library
+brew 'asciidoctor' # Text processor and publishing toolchain for AsciiDoc
+brew 'aspell' # Spell checker with better logic than ispell
+brew 'autoconf' # Automatic configure script builder
+brew 'automake' # Tool for generating GNU Standards-compliant Makefiles
+brew 'aws-okta' # Authenticate with AWS using your Okta credentials
+brew 'bash-completion@2' # Programmable completion for Bash 4.1+
+brew 'bash-git-prompt' # Informative, fancy bash prompt for Git users
+brew 'bash-preexec' # preexec and precmd functions for Bash (just like Zsh)
+brew 'bash' # Bourne-Again SHell, a UNIX command interpreter
+brew 'cairo' # Vector graphics library with cross-device output support
+brew 'composer' # Dependency Manager for PHP
+brew 'curl' # Get a file from an HTTP, HTTPS or FTP server
+brew 'dbus' # Message bus system, providing inter-application communication
+brew 'diff-so-fancy' # Good-lookin' diffs with diff-highlight and more
+# brew 'docker-compose' #
+# brew 'docker-machine' #
+# brew 'docker' #
+brew 'dos2unix' # Convert text between DOS, UNIX, and Mac formats
+# brew 'doxygen' # Generate documentation for several programming languages
+brew 'elasticsearch' # Distributed search & analytics engine
+# brew 'enchant' # Spellchecker wrapping library
+brew 'extract_url' # Perl script to extracts URLs from emails or plain text
+brew 'ffind' # Friendlier find
+brew 'figlet' # Banner-like program prints strings as ASCII art
+brew 'freetds' # Libraries to talk to Microsoft SQL Server and Sybase databases
+brew 'freetype' # Software library to render fonts
+brew 'fzf' # Command-line fuzzy finder written in Go
+brew 'gcc' # GNU compiler collection
+brew 'gdbm' # GNU database manager
+brew 'geckodriver' # WebDriver <-> Marionette proxy
+brew 'gettext' # GNU internationalization (i18n) and localization (l10n) library
+brew 'giflib' # Library and utilities for processing GIFs
+brew 'gist' # Command-line utility for uploading Gists
+brew 'git-extras' # Small git utilities
+brew 'git-flow' # Extensions to follow Vincent Driessen's branching model
+brew 'git' # Distributed revision control system
+brew 'github/gh/gh' # GitHub command-line tool
+brew 'gmp' # GNU multiple precision arithmetic library
+brew 'gnupg' # GNU Pretty Good Privacy (PGP) package
+brew 'gnutls' # GNU Transport Layer Security (TLS) Library
+brew 'grc' # Colorize logfiles and command output
+brew 'grep' # GNU grep, egrep and fgrep
+brew 'guile' # GNU Ubiquitous Intelligent Language for Extensions
+brew 'htop' # Improved top (interactive process viewer)
+brew 'hub' # Add GitHub support to git on the command-line
+brew 'imagemagick' # Tools and libraries to manipulate images in many formats
+brew 'imagesnap' # Tool to capture still images from an iSight or other video source
+#brew 'itermocil' # failed on install
+brew 'jpeg' # Image manipulation library
+brew 'jq' # Lightweight and flexible command-line JSON processor
+brew 'libffi' # Portable Foreign Function Interface library
+brew 'libgcrypt' # Cryptographic library based on the code from GnuPG
+brew 'libgpg-error' # Common error values for all GnuPG components
+brew 'libksba' # X.509 and CMS library
+brew 'libpng' # Library for manipulating PNG images
+brew 'libpq' # Postgres C API library
+brew 'libssh' # C library SSHv1/SSHv2 client and server protocols
+brew 'libtasn1' # ASN.1 structure parser library
+brew 'libtiff' # TIFF library and utilities
+brew 'libtool' # Generic library support script
+brew 'libunistring' # C string library for manipulating Unicode strings
+brew 'libxml2' # GNOME XML library
+brew 'libyaml' # YAML Parser
+brew 'mcrypt' # Replacement for the old crypt package and crypt(1) command
+brew 'mhash' # Uniform interface to a large number of hash algorithms
+brew 'minikube' # Run a Kubernetes cluster locally
+# brew 'mongodb-community' # High-performance, schema-free, document-oriented database
+brew "mysql@5.7", restart_service: true, link: true, conflicts_with: ["mysql"] # Open source relational database management system
+brew 'ncdu' # NCurses Disk Usage
+brew 'nettle' # Low-level cryptographic library
+brew 'oniguruma' # Regular expressions library
+brew 'openssl' # SSL/TLS cryptography library
+brew 'ossp-uuid' # ISO-C API and CLI for generating UUIDs
+brew 'p7zip' # 7-Zip (high compression file archiver) implementation
+brew 'pcre' # Perl compatible regular expressions library
+brew 'perl' # Highly capable, feature-rich programming language
+brew 'pkg-config' # Manage compile and link flags for libraries
+brew 'postgresql@11' # Object-relational database system
+brew 'python3' # Interpreted, interactive, object-oriented programming language
+brew 'rabbitmq' # Messaging broker
+brew 'romkatv/powerlevel10k/powerlevel10k' # THEME
+brew 'readline' # Library for command-line editing
+brew 'redis' # Persistent key-value database, with built-in net interface
+brew 'rename' # Perl-powered file rename script with many helpful built-ins
+brew 'ruby-install' # Install Ruby, JRuby, Rubinius, TruffleRuby, or mruby
+brew 'ruby' # Powerful, clean, object-oriented scripting language
+brew 'spellcheck' # ShellCheck is a GPLv3 tool that gives warnings and suggestions for bash/sh shell scripts
+brew 'sqlite' # Command-line interface for SQLite
+brew 'ssh-copy-id' # Add a public key to a remote machine's authorized_keys file
+brew 'telnet' # User interface to the TELNET protocol
+brew 'terminal-notifier' # Send macOS User Notifications from the command-line
+brew 'tig' # Text interface for Git repositories
+brew 'tmate' # Instant terminal sharing
+brew 'tmux' # Terminal multiplexer
+# brew "tophat/bar/yvm" # failed in install
+brew 'tree' # Display directories as trees (with optional color/HTML output)
+brew 'unixodbc' # ODBC 3 connectivity for UNIX
+brew 'urlview' # URL extractor/launcher
+brew 'watchman' # Watch files and take action when they change
+brew 'wget' # Internet file retriever
+brew 'xz' # General-purpose data compression with high compression ratio
+brew 'zlib' # General-purpose lossless data-compression library
+brew 'zsh-completions' # Additional completion definitions for zsh
+brew 'zsh-lovers' # Tips, tricks, and examples for zsh
+brew 'zsh-syntax-highlighting' # Fish shell like syntax highlighting for zsh
+brew 'zsh' # UNIX shell (command interpreter)
+
+# some items above install node with brew. Uninstall after
+# brew uninstall node --ignore-dependencies
