@@ -33,10 +33,10 @@ alias rsync='noglob rsync'
 if $(gls &>/dev/null)
 then
   alias gls="gls --color=auto --group-directories-first"
-  alias ls="gls -h"
-  alias l="gls -lAhp"
-  alias ll="gls -lhp"
-  alias la="gls -Alhp"
+  alias ls="gls -h --group-directories-first"
+  alias l="gls -lAhp --group-directories-first"
+  alias ll="gls -lhp --group-directories-first"
+  alias la="gls -Alhp --group-directories-first"
 fi
 alias s="ls"
 alias last='ls *(.om[1])'
@@ -138,9 +138,8 @@ alias pip="echo \"NOTE: using pip3 alias instead\n\" && pip3"
 alias updatenvim="brew update; brew reinstall --HEAD neovim; pip3 install -U --user neovim; pip2 install -U --user neovim; pip2 install --upgrade pip; nvim +PlugUpdate +qall"
 alias nvimupdate=updatenvim
 alias nv="nvim"
-# alias vim="nvim"
-# alias vi="nvim"
-alias im="nvim"
+alias vi="vim"
+alias im="vim"
 
 # alias nvt="nv +tabe +term +NvimuxVerticalSplit +term +tabnext"
 # alias nvts="nv +tabe +term +NvimuxVerticalSplit +term +NvimuxHorizontalSplit +term +tabnext"
@@ -296,6 +295,9 @@ alias rs="bundle exec rails server"
 alias rsp="bundle exec rails server -p"
 alias rc="bundle exec rails console"
 alias bec=rc
+
+# NODE/NPM/YARN
+# -----------------------------------------------------------------------------
 
 
 # MISC / RANDOM

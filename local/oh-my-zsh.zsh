@@ -80,12 +80,11 @@ plugins=(
   ansible
   git
   brew
-  copydir
+  copypath
   copyfile
   copybuffer
   helm
   jsontools
-  jenv
   kubectl
   node
   npm

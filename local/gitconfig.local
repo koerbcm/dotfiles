@@ -204,6 +204,7 @@
   di = diff
   dc = diff --cached
   df = diff
+  gd = "!git diff -- ':!package-lock.json' ':!yarn.lock'"
   ds = diff --stat=160,120
   dl = "!git ll -1"
   dlc = diff --cached HEAD^
