@@ -2,6 +2,10 @@ function killport() {
   lsof -t -i tcp:$1 | xargs kill
 }
 
+function killps() {
+  kill -9 $(ps -ef | grep "$1" | grep -v 'grep' | awk {'print $2'})
+}
+
 function dnd () {
   osascript -e "
     tell application \"System Events\" to tell process \"SystemUIServer\"

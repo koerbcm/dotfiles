@@ -3,7 +3,7 @@
 
 # Auto-correction exceptions
 # -----------------------------------------------------------------------------
-alias bundle='nocorrect bundle'
+# alias bundle='nocorrect bundle'
 alias cabal='nocorrect cabal'
 alias man='nocorrect man'
 alias mkdir='nocorrect mkdir'

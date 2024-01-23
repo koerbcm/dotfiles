@@ -24,14 +24,25 @@ export PATH="$(yarn global bin):$PATH"
 
 PATH=$HOME/.npm-global/bin:$PATH
 
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+PATH="$PATH:$HOME/.rvm/bin"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+
 if brew ls --versions jenv > /dev/null; then
   # PATH="$HOME/.jenv/shims:$PATH" # doesn't appear in docs anymore
   PATH="$HOME/.jenv/bin:$PATH"
   eval "$(jenv init -)"
+  jenv enable-plugin export
 
   # jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-12.jdk/Contents/Home/
   # jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/
 fi
 
+if brew ls --versions ruby > /dev/null; then
+  export RUBY_HOME=/usr/local/opt/ruby/bin
+  export PATH="$RUBY_HOME:$PATH"
+fi
 
 export -U PATH

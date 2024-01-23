@@ -297,7 +297,10 @@
 
 # Git Functions
   sweep   = !$ZSH/bin/git-sweep
+  pro = !$ZSH/bin/git-promote
   promote = !$ZSH/bin/git-promote
+  promoteup = !$ZSH/bin/git-promote-upstream
+  proup = !$ZSH/bin/git-promote-upstream
   wtf     = !$ZSH/bin/git-wtf
   rank-contributers = !$ZSH/bin/git-rank-contributers
   resume  = !$ZSH/bin/git-unwip
