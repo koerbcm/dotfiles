@@ -4306,6 +4306,8 @@
 	<integer>1</integer>
 	<key>TabStyleWithAutomaticOption</key>
 	<integer>5</integer>
+	<key>TimeBetweenTips</key>
+	<real>604800</real>
 	<key>ToolbeltTools</key>
 	<array>
 		<string>Profiles</string>
@@ -4315,7 +4317,7 @@
 	<key>VisualIndicatorForEsc</key>
 	<false/>
 	<key>findMode_iTerm</key>
-	<integer>4</integer>
+	<integer>2</integer>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>

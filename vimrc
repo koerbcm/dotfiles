@@ -4,17 +4,20 @@ set encoding=utf-8
 let mapleader = " "
 
 set backspace=2   " Backspace deletes like most programs in insert mode
-set nobackup
-set nowritebackup
-set noswapfile    " http://robots.thoughtbot.com/post/18739402579/global-gitignore#comment-458413287
-set history=50
+set nobackup      " Don't create backup files
+set nowritebackup " Don't create backup or swap files
+set noswapfile     " http://robots.thoughtbot.com/post/18739402579/global-gitignore#comment-458413287
+set history=1000  " Keep 1000 lines of command line history
 set ruler         " show the cursor position all the time
 set showcmd       " display incomplete commands
 set incsearch     " do incremental searching
 set laststatus=2  " Always display the status line
 set autowrite     " Automatically :write before running commands
 set modelines=0   " Disable modelines as a security precaution
-set nomodeline
+set nomodeline    " Disable modelines as a security precaution
+set ignorecase    " Ignore capital letters during search
+set smartcase     " Override the 'ignorecase' option if the search pattern contains upper case characters
+set scrolloff=10  " Always show 10 lines around the cursor
 
 " Switch syntax highlighting on, when the terminal has colors
 " Also switch on highlighting the last used search pattern.
@@ -31,7 +34,14 @@ if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &rtp) ==# ''
   runtime! macros/matchit.vim
 endif
 
-filetype plugin indent on
+" Enable type file detection. Vim will be able to try to detect the type of file is use.
+filetype on
+
+" Enable plugins and load plugin for the detected file type.
+filetype plugin on
+
+" Load an indent file for the detected file type.
+filetype indent on
 
 augroup vimrcEx
   autocmd!
@@ -111,6 +121,9 @@ set colorcolumn=+1
 " Numbers
 set number
 set numberwidth=5
+
+" Highlight cursor line underneath the cursor horizontally.
+set cursorline
 
 " Tab completion
 " will insert tab at beginning of line,

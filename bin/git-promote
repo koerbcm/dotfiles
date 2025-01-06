@@ -9,7 +9,7 @@
 curr_branch=$(git symbolic-ref -q HEAD | sed -e 's|^refs/heads/||')
 
 remote_branch=$(git branch -r | grep "origin/${curr_branch}")
-[ -z "${remote_branch}" ] && ( git push origin "${curr_branch}" )
+[ -z "${remote_branch}" ] && ( git push origin "${curr_branch}" --no-verify)
 
 origin=$(git config --get "branch.${curr_branch}.remote")
 [ -z "${origin}" ] && ( git config --add "branch.${curr_branch}.remote" origin )

@@ -20,6 +20,8 @@ Clone onto your laptop:
 (Or, [fork and keep your fork
 updated](http://robots.thoughtbot.com/keeping-a-github-fork-updated)).
 
+Run ./install/homebrew/install.sh
+
 Install [rcm](https://github.com/thoughtbot/rcm):
 
     brew install rcm
@@ -43,7 +45,6 @@ configuration options:
   `~/dotfiles-local`
 * Please configure the `rcrc` file if you'd like to make personal
   overrides in a different directory
-
 
 Update
 ------

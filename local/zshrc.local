@@ -1,4 +1,5 @@
 #!/usr/bin/zsh
+
 # There are different zsh shell modes, and files that manage those:
 #
 # .zshenv: (always) <-- vim responds to stuff in here
@@ -15,8 +16,12 @@
 # fi
 
 export DOTFILES=$HOME/.dotfiles
-export ZPLUG_HOME=/usr/local/opt/zplug
 export PGDATA="/usr/local/var/postgres"
+
+# mac specific stuff
+if [ $OS == "mac" ]; then
+  export ZPLUG_HOME=$(brew --prefix)/opt/zplug
+fi
 
 # use .localrc for SUPER SECRET STUFF that you don't
 # want in your public, versioned repo.
@@ -25,18 +30,26 @@ then
   . ~/.localrc
 fi
 
+test -e "${HOME}/.oh-my-zsh.zsh" && source "${HOME}/.oh-my-zsh.zsh"
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+test -e "${HOME}/.zplug-plugins.zsh" && source "${HOME}/.zplug-plugins.zsh"
+
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 # needs to be installed with brew `brew install zsh-autosuggestions`
 # test -e "/usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh" && source /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 test -e "${DOTFILES}/local/modified-files.sh" && source $DOTFILES/local/modified-files.sh
-
-test -e "${HOME}/.oh-my-zsh.zsh" && source "${HOME}/.oh-my-zsh.zsh"
-test -e "${HOME}/.zplug-plugins.zsh" && source "${HOME}/.zplug-plugins.zsh"
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"

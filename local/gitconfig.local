@@ -201,6 +201,7 @@
   #squash = "!git rebase -i --autosquash $(git merge-base master HEAD)"
   sq = "!git rebase -i --autosquash $(git merge-base master HEAD)"
 
+  diff = "!git diff $1 -- ':!package-lock.json' ':!yarn.lock'"
   di = diff
   dc = diff --cached
   df = diff
@@ -229,6 +230,7 @@
   fa = fetch --all
   pom = push origin master
   pfl = push --force-with-lease
+  pnv = push --no-verify
 
   s = status -sb
 
