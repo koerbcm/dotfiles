@@ -21,6 +21,8 @@ export PGDATA="/usr/local/var/postgres"
 # mac specific stuff
 if [ $OS == "mac" ]; then
   export ZPLUG_HOME=$(brew --prefix)/opt/zplug
+elif [ $OS == "linux" ]; then
+  export ZPLUG_HOME=$HOME/.zplug
 fi
 
 # use .localrc for SUPER SECRET STUFF that you don't
@@ -28,6 +30,11 @@ fi
 if [[ -a ~/.localrc ]]
 then
   . ~/.localrc
+fi
+
+if [ $OS == "linux" ]; then
+  # windows disable
+  export ZSH_DISABLE_COMPFIX="true"
 fi
 
 test -e "${HOME}/.oh-my-zsh.zsh" && source "${HOME}/.oh-my-zsh.zsh"

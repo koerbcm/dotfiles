@@ -37,10 +37,15 @@ alias rsync='noglob rsync'
 if $(gls &>/dev/null)
 then
   alias gls="gls --color=auto --group-directories-first"
-  alias ls="gls -h --group-directories-first"
-  alias l="gls -lAhp --group-directories-first"
-  alias ll="gls -lhp --group-directories-first"
-  alias la="gls -Alhp --group-directories-first"
+  alias ls="gls -h --color=auto --group-directories-first"
+  alias l="gls -lAhp --color=auto --group-directories-first"
+  alias ll="gls -lhp --color=auto --group-directories-first"
+  alias la="gls -Alhp --color=auto --group-directories-first"
+else
+  alias ls="ls -h --color=auto --group-directories-first"
+  alias l="ls -lAhp --color=auto --group-directories-first"
+  alias ll="ls -lhp --color=auto --group-directories-first"
+  alias la="ls -Alhp --color=auto --group-directories-first"
 fi
 alias s="ls"
 alias last='ls *(.om[1])'

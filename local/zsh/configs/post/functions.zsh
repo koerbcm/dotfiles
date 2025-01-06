@@ -147,17 +147,17 @@ function zsh_recompile {
 preexec() { LS_USED=$(echo $1|cut -d' ' -f1) }
 chpwd() {
   case "$LS_USED" in
-    cd)         gls --color=auto --group-directories-first -hF;;
-    cdl)        gls --color=auto --group-directories-first -hlF;;
-    cda)        gls --color=auto --group-directories-first -hlAF;;
-    cdd)        gls --color=auto -d *(-/N);;
-    cdf)        gls --color=auto *(-.N);;
-    cdad)       gls --color=auto -d *(-/DN);;
-    cdaf)       gls --color=auto *(-.DN);;
-    cdnew)      gls --color=auto -lAhrt;;
-    cdbig)      gls --color=auto -lArSh;;
-    cdold)      gls --color=auto -lAht;;
-    cdsmall)    gls --color=auto -lASh;;
+    cd)         ls --color=auto --group-directories-first -hF;;
+    cdl)        ls --color=auto --group-directories-first -hlF;;
+    cda)        ls --color=auto --group-directories-first -hlAF;;
+    cdd)        ls --color=auto -d *(-/N);;
+    cdf)        ls --color=auto *(-.N);;
+    cdad)       ls --color=auto -d *(-/DN);;
+    cdaf)       ls --color=auto *(-.DN);;
+    cdnew)      ls --color=auto -lAhrt;;
+    cdbig)      ls --color=auto -lArSh;;
+    cdold)      ls --color=auto -lAht;;
+    cdsmall)    ls --color=auto -lASh;;
     *) ls --color=auto --group-directories-first -hF;;
   esac
 
