@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+
+# this is needed for the zshrc file to work correctly for
+# "$_dir"/pre/**/*~*.zwc(N-.)
+setopt extendedglob
