@@ -20,11 +20,22 @@ Clone onto your laptop:
 (Or, [fork and keep your fork
 updated](http://robots.thoughtbot.com/keeping-a-github-fork-updated)).
 
-Run ./install/homebrew/install.sh
+Run the bootstrap installer:
 
-Install [rcm](https://github.com/thoughtbot/rcm):
+    bash ~/.dotfiles/installs/homebrew/install.sh
 
+Behavior by platform:
+
+* macOS: installs/updates Homebrew, applies `installs/homebrew/Brewfile`, and configures nvm.
+* Linux/WSL: skips Homebrew entirely and configures nvm directly.
+
+Install [rcm](https://github.com/thoughtbot/rcm) if `rcup` is missing:
+
+    # macOS
     brew install rcm
+
+    # Ubuntu/WSL
+    sudo apt-get update && sudo apt-get install -y rcm
 
 Install the dotfiles:
 
