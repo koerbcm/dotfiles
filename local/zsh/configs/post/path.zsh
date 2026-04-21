@@ -1,68 +1,106 @@
-#!/usr/bin/sh
-# PATHS
-# ===========================================================================
-# ** Doesn't allow rvm or nvm to load. Commenting it out **
+#!/usr/bin/env zsh
 
-# if [ -x /usr/libexec/path_helper ]; then
-#   # Mac OS X uses path_helper and /etc/paths.d to preload PATH, clear it out first
-#   PATH=''
-#   eval `/usr/libexec/path_helper -s`
-# fi
+# Keep PATH deterministic and deduplicated across login/non-login shells.
+typeset -gU path
 
-PATH="$HOME/.dotfiles/bin:$HOME/.bin:$HOME/bin:$PATH"
-PATH=$HOME/.npm-global/bin:$PATH
+_dotfiles_path_prepend_if_dir() {
+  local _dir="$1"
+  [[ -d "$_dir" ]] || return 0
+  path=("$_dir" ${path:#"$_dir"})
+}
 
-if [ $OS == "mac" ]; then
-  PATH="$PATH:/usr/local/bin:/usr/local/lib/node_modules"
-  # PATH="$PATH:/usr/local/opt/gnu-sed/libexec/gnubin" # make sure gnu-sed works as sed
-  # PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-  # PATH="/usr/local/opt/gettext/bin:$PATH"
-  PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-  # PATH="/usr/local/opt/rock-runtime-ruby22/bin:$PATH" # Shutterstock - Putting it first so ruby defaults to it and not ruby in /usr/local/bin
+_dotfiles_path_append_if_dir() {
+  local _dir="$1"
+  [[ -d "$_dir" ]] || return 0
+  path=(${path:#"$_dir"} "$_dir")
+}
 
-  if brew ls --versions yarn > /dev/null; then
-  export YVM_DIR=/usr/local/opt/yvm
-  [ -r $YVM_DIR/yvm.sh ] && . $YVM_DIR/yvm.sh
+dotfiles_normalize_path() {
+  emulate -L zsh
+  typeset -gU path
 
-    export PATH="$(yarn global bin):$PATH"
+  local _dotfiles_platform _pnpm_home_default _dir _i
+  _dotfiles_platform="${DOTFILES_PLATFORM:-${OS:-}}"
+
+  # Drop legacy node manager path entries before rebuilding preferred order.
+  path=(${path:#"$HOME/.n/bin"})
+  if command -v nvm >/dev/null 2>&1; then
+    path=(${path:#"$HOME/.npm-global/bin"})
   fi
 
-  # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-  PATH="$PATH:$HOME/.rvm/bin"
+  # Package-manager bins used often on interactive shells.
+  _pnpm_home_default=""
+  if [[ "$_dotfiles_platform" == "mac" ]]; then
+    _pnpm_home_default="$HOME/Library/pnpm"
+  elif [[ "$_dotfiles_platform" == "linux" || "$_dotfiles_platform" == "wsl" ]]; then
+    _pnpm_home_default="$HOME/.local/share/pnpm"
+  fi
+  if [[ -n "${DOTFILES_PNPM_HOME:-}" ]]; then
+    PNPM_HOME="${DOTFILES_PNPM_HOME}"
+  elif [[ -n "$_pnpm_home_default" ]]; then
+    PNPM_HOME="$_pnpm_home_default"
+  fi
 
-  [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+  local -a _path_front=(
+    "$HOME/.dotfiles/bin"
+    "$HOME/.bin"
+    "$HOME/bin"
+    "${PNPM_HOME:-}"
+    "${NVM_BIN:-}"
+    "$HOME/.pyenv/shims"
+    "$HOME/.jenv/shims"
+    "$HOME/.pyenv/bin"
+    "$HOME/.jenv/bin"
+  )
 
+  # Homebrew/Linuxbrew fallback for non-login shells.
+  case "$_dotfiles_platform" in
+    mac)
+      _path_front+=("/opt/homebrew/bin" "/opt/homebrew/sbin" "/usr/local/bin" "/usr/local/sbin")
+      ;;
+    linux|wsl)
+      _path_front+=("/home/linuxbrew/.linuxbrew/bin" "/home/linuxbrew/.linuxbrew/sbin" "$HOME/.linuxbrew/bin" "$HOME/.linuxbrew/sbin" "/usr/local/bin" "/usr/local/sbin")
+      ;;
+  esac
 
-  if brew ls --versions jenv > /dev/null; then
-    # PATH="$HOME/.jenv/shims:$PATH" # doesn't appear in docs anymore
-    PATH="$HOME/.jenv/bin:$PATH"
-    eval "$(jenv init -)"
+  for (( _i=${#_path_front[@]}; _i>=1; _i-- )); do
+    _dotfiles_path_prepend_if_dir "${_path_front[_i]}"
+  done
 
-    if [ "$(jenv plugins --enabled | wc -l )" -eq 0 ]; then
-      jenv enable-plugin export
+  # Keep explicit system dirs present for Linux/WSL if inherited PATH is minimal.
+  if [[ "$_dotfiles_platform" == "linux" || "$_dotfiles_platform" == "wsl" ]]; then
+    for _dir in /usr/sbin /usr/bin /sbin /bin; do
+      _dotfiles_path_append_if_dir "$_dir"
+    done
+  fi
+
+  # Convenience bins that should not win precedence.
+  for _dir in \
+    "/Applications/Visual Studio Code.app/Contents/Resources/app/bin" \
+    "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin" \
+    "/Applications/VSCodium.app/Contents/Resources/app/bin" \
+    "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin" \
+    "$HOME/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin" \
+    "$HOME/Applications/VSCodium.app/Contents/Resources/app/bin" \
+    "$HOME/.rvm/bin"; do
+    _dotfiles_path_append_if_dir "$_dir"
+  done
+
+  # If only insiders/codium command exists, preserve `code` muscle memory.
+  if ! command -v code >/dev/null 2>&1; then
+    if command -v code-insiders >/dev/null 2>&1; then
+      alias code='code-insiders'
+    elif command -v codium >/dev/null 2>&1; then
+      alias code='codium'
+    elif [[ "$_dotfiles_platform" == "mac" ]]; then
+      code() { open -a "Visual Studio Code" "$@"; }
     fi
-    # jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-12.jdk/Contents/Home/
-    # jenv add /Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/
   fi
 
-  if brew ls --versions ruby > /dev/null; then
-    export RUBY_HOME=/usr/local/opt/ruby/bin
-    export PATH="$RUBY_HOME:$PATH"
-  fi
+  export PNPM_HOME
+  export PATH
 
-fi
+  unset _dotfiles_platform _pnpm_home_default _dir _i _path_front
+}
 
-if [ $OS == "linux" ]; then
-  PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Program Files/Eclipse Adoptium/jdk-11.0.17.8-hotspot/bin:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/mc2ul/AppData/Local/Programs/Python/Python311/Scripts/:/mnt/c/Users/mc2ul/AppData/Local/Programs/Python/Python311/:/mnt/c/Users/mc2ul/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/mc2ul/AppData/Local/Programs/Microsoft VS Code/bin"
-
-  if [ -x "$(command -v yarn)" ]; then
-    export PATH="$(yarn global bin):$PATH"
-  fi
-
-fi
-
-
-export -U PATH
-
-# original windows PATH
-# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/Program Files/Eclipse Adoptium/jdk-11.0.17.8-hotspot/bin:/mnt/c/Program Files/Oculus/Support/oculus-runtime:/mnt/c/Windows/system32:/mnt/c/Windows:/mnt/c/Windows/System32/Wbem:/mnt/c/Windows/System32/WindowsPowerShell/v1.0/:/mnt/c/Windows/System32/OpenSSH/:/mnt/c/Program Files/dotnet/:/mnt/c/Program Files (x86)/NVIDIA Corporation/PhysX/Common:/mnt/c/Program Files/NVIDIA Corporation/NVIDIA NvDLISR:/mnt/c/Program Files/Git/cmd:/mnt/c/Users/mc2ul/AppData/Local/Programs/Python/Python311/Scripts/:/mnt/c/Users/mc2ul/AppData/Local/Programs/Python/Python311/:/mnt/c/Users/mc2ul/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/mc2ul/AppData/Local/Programs/Microsoft VS Code/bin:/mnt/d/Users/koerbcm/.n/bin
+dotfiles_normalize_path

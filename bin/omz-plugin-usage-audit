@@ -1,0 +1,72 @@
+#!/usr/bin/env zsh
+
+if [[ -n "$1" ]]; then
+  HISTORY_FILE="$1"
+elif [[ -n "${HISTFILE:-}" && -r "${HISTFILE}" ]]; then
+  HISTORY_FILE="${HISTFILE}"
+elif [[ -r "$HOME/.zhistory" ]]; then
+  HISTORY_FILE="$HOME/.zhistory"
+else
+  HISTORY_FILE="$HOME/.zsh_history"
+fi
+
+if [[ ! -r "$HISTORY_FILE" ]]; then
+  echo "Cannot read history file: $HISTORY_FILE" >&2
+  exit 1
+fi
+
+TMP_FILE="$(mktemp /tmp/omz-plugin-usage.XXXXXX)"
+trap 'rm -f "$TMP_FILE"' EXIT
+
+sed -E 's/^: [0-9]+:[0-9]+;//' "$HISTORY_FILE" | \
+  awk '{
+    for (i = 1; i <= NF; i++) {
+      if ($i ~ /^[A-Za-z_][A-Za-z0-9_]*=.*/) continue
+      print $i
+      break
+    }
+  }' > "$TMP_FILE"
+
+_count_cmd() {
+  local cmd="$1"
+  awk -v c="$cmd" '$1==c{n++} END{print n+0}' "$TMP_FILE"
+}
+
+_exists() {
+  local cmd="$1"
+  if command -v "$cmd" >/dev/null 2>&1; then
+    echo yes
+  else
+    echo no
+  fi
+}
+
+printf '%-14s %-12s %-8s %s\n' 'plugin' 'primary-cmd' 'installed' 'history-count'
+printf '%-14s %-12s %-8s %s\n' '------' '-----------' '--------' '-------------'
+
+while IFS='|' read -r plugin cmd; do
+  if [[ "$cmd" == "n/a" ]]; then
+    printf '%-14s %-12s %-8s %s\n' "$plugin" "$cmd" '-' '-'
+    continue
+  fi
+
+  installed="$(_exists "$cmd")"
+  count="$(_count_cmd "$cmd")"
+  printf '%-14s %-12s %-8s %s\n' "$plugin" "$cmd" "$installed" "$count"
+done <<'MAP'
+git|git
+aws|aws
+ansible|ansible
+brew|brew
+helm|helm
+kubectl|kubectl
+node|node
+npm|npm
+vscode|code
+copypath|n/a
+copyfile|n/a
+copybuffer|n/a
+MAP
+
+echo
+echo "Tip: plugin use via completion/widgets won't always appear in history."

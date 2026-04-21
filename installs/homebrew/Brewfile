@@ -1,0 +1,107 @@
+# Managed Brewfile for dotfiles bootstrap.
+# Keep this focused on top-level tools you intentionally use.
+
+# Taps
+# `homebrew/bundle` is required for `brew bundle` itself.
+tap 'homebrew/bundle'
+tap 'homebrew/services'
+tap 'domt4/autoupdate'
+tap 'snyk/tap'
+
+# macOS GUI apps
+if OS.mac?
+  cask_args appdir: '/Applications'
+
+  cask 'codex'
+  cask 'contexts'
+  cask 'docker-desktop'
+  cask 'firefox'
+  cask 'flux-app'
+  cask 'istat-menus'
+  cask 'temurin@8'
+  cask 'temurin@11'
+  cask 'temurin'
+  cask 'warp'
+end
+
+# Core shell + git + CLI quality of life
+brew 'ack'
+brew 'bash'
+brew 'bash-completion@2'
+brew 'bash-git-prompt'
+brew 'coreutils'
+brew 'curl'
+brew 'diff-so-fancy'
+brew 'dos2unix'
+brew 'findutils'
+brew 'fzf'
+brew 'gh'
+brew 'gist'
+brew 'git'
+brew 'git-extras'
+brew 'gnupg'
+brew 'grep'
+brew 'jq'
+brew 'moreutils'
+brew 'rcm'
+brew 'rename'
+brew 'ripgrep'
+brew 'shellcheck'
+brew 'ssh-copy-id'
+brew 'tmux'
+brew 'watch'
+brew 'wget'
+brew 'zsh'
+brew 'zsh-autosuggestions'
+brew 'zsh-completions'
+brew 'zsh-lovers'
+brew 'zsh-syntax-highlighting'
+
+# Language/toolchain managers
+brew 'autoconf'
+brew 'automake'
+brew 'dotnet'
+brew 'gcc'
+brew 'jenv'
+brew 'nvm'
+brew 'openjdk@17'
+brew 'pyenv'
+brew 'yarn'
+
+# Platform/devops tooling
+brew 'allure'
+brew 'aws-okta'
+brew 'dive'
+brew 'hadolint'
+brew 'helm'
+brew 'kubelogin'
+brew 'kubernetes-cli'
+brew 'minikube'
+brew 'snyk'
+brew 'sonar-scanner'
+brew 'vault'
+brew 'yq'
+
+# Services / infra clients
+brew 'libpq'
+brew 'mysql@8.0'
+brew 'postgresql@15'
+brew 'rabbitmq'
+brew 'redis'
+
+# Utilities you currently have installed
+brew 'extract_url'
+brew 'ffmpeg'
+brew 'jsoncpp'
+brew 'openldap'
+brew 'ossp-uuid'
+brew 'p7zip'
+brew 'telnet'
+brew 'terminal-notifier'
+
+# Removed from managed set due deprecation/obsolescence:
+# - git-flow
+# - mysql@5.7
+# - postgresql@11
+# - openssl@1.1
+# - zplug

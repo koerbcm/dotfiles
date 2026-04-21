@@ -1,7 +1,7 @@
-if [ -d "/opt/homebrew" ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-elif [ -d "~/.linuxbrew" ]; then
-  eval "$(~/.linuxbrew/bin/brew shellenv)"
-elif [ -d "/home/linuxbrew" ]; then
-  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+if [ -x "/opt/homebrew/bin/brew" ]; then
+  eval "$("/opt/homebrew/bin/brew" shellenv)"
+elif [ -x "$HOME/.linuxbrew/bin/brew" ]; then
+  eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
+elif [ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+  eval "$("/home/linuxbrew/.linuxbrew/bin/brew" shellenv)"
 fi

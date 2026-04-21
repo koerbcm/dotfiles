@@ -107,8 +107,8 @@ function require_gem() {
 }
 
 function require_npm() {
-    sourceNVM
-    nvm use stable
+    sourceNVM || return 1
+    nvm use --silent default >/dev/null 2>&1 || true
     running "npm $1"
     npm list -g --depth 0 | grep $1@ > /dev/null
     if [[ $? != 0 ]]; then
@@ -119,23 +119,47 @@ function require_npm() {
 }
 
 function sourceNVM(){
-    export NVM_DIR=~/.nvm
-    source $(brew --prefix nvm)/nvm.sh
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+    mkdir -p "$NVM_DIR"
+
+    local nvm_sh=""
+    local candidates=(
+      "$NVM_DIR/nvm.sh"
+      "/opt/homebrew/opt/nvm/nvm.sh"
+      "/usr/local/opt/nvm/nvm.sh"
+      "$HOME/.linuxbrew/opt/nvm/nvm.sh"
+      "/home/linuxbrew/.linuxbrew/opt/nvm/nvm.sh"
+    )
+
+    if command -v brew >/dev/null 2>&1; then
+      local brew_nvm_prefix
+      brew_nvm_prefix="$(brew --prefix nvm 2>/dev/null)"
+      [[ -n "$brew_nvm_prefix" ]] && candidates+=("$brew_nvm_prefix/nvm.sh")
+    fi
+
+    for nvm_sh in "${candidates[@]}"; do
+      if [[ -s "$nvm_sh" ]]; then
+        source "$nvm_sh"
+        return 0
+      fi
+    done
+
+    return 1
 }
 
 
 function require_nvm() {
-    mkdir -p ~/.nvm
-    cp $(brew --prefix nvm)/nvm-exec ~/.nvm/
-    sourceNVM
-    nvm install $1
-    if [[ $? != 0 ]]; then
+    sourceNVM || {
         action "installing nvm"
-        curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash
-        . ~/.bashrc
-        nvm install $1
+        brew install nvm
+        sourceNVM || fail "failed to source nvm after brew install"
+    }
+
+    if [[ -n "$1" ]]; then
+        nvm install "$1" --latest-npm
+        nvm use "$1"
     fi
-    nvm use $1
+
     ok
 }
 

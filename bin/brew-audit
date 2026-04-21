@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+BREWFILE="${1:-$REPO_ROOT/installs/homebrew/Brewfile}"
+
+if ! command -v brew >/dev/null 2>&1; then
+  echo "brew not found in PATH" >&2
+  exit 1
+fi
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq not found in PATH (required for deprecated package checks)" >&2
+  exit 1
+fi
+if [[ ! -f "$BREWFILE" ]]; then
+  echo "Brewfile not found: $BREWFILE" >&2
+  exit 1
+fi
+
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+tmpdir="$(mktemp -d /tmp/brew-audit.XXXXXX)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+list_bundle() {
+  local kind="$1"
+  brew bundle list "--$kind" --file "$BREWFILE" 2>/dev/null | sed '/^$/d' | sort -u
+}
+
+list_installed_formula() {
+  brew list --formula | sed '/^$/d' | sort -u
+}
+
+list_installed_cask() {
+  if brew list --cask >/dev/null 2>&1; then
+    brew list --cask | sed '/^$/d' | sort -u
+  fi
+}
+
+list_installed_taps() {
+  brew tap | sed '/^$/d' | sort -u
+}
+
+list_deprecated_formula() {
+  brew info --json=v2 --installed | jq -r '
+    .formulae[]
+    | select((.deprecated // false) or (.disabled // false))
+    | [
+        .name,
+        (if .deprecated then "deprecated" else "" end),
+        (if .disabled then "disabled" else "" end),
+        (.deprecation_date // ""),
+        (.disable_date // ""),
+        (.disable_reason // "")
+      ]
+    | @tsv
+  '
+}
+
+list_deprecated_cask() {
+  brew info --json=v2 --installed | jq -r '
+    .casks[]
+    | select((.deprecated // false) or (.disabled // false))
+    | [
+        .token,
+        (if .deprecated then "deprecated" else "" end),
+        (if .disabled then "disabled" else "" end),
+        (.deprecation_date // ""),
+        (.disable_date // ""),
+        (.disable_reason // "")
+      ]
+    | @tsv
+  '
+}
+
+print_section() {
+  local title="$1"
+  local file="$2"
+  echo
+  echo "$title"
+  printf '%*s\n' "${#title}" '' | tr ' ' '-'
+  if [[ -s "$file" ]]; then
+    cat "$file"
+  else
+    echo "(none)"
+  fi
+}
+
+list_bundle formula >"$tmpdir/bf_formula"
+list_bundle cask >"$tmpdir/bf_cask"
+list_bundle tap >"$tmpdir/bf_tap"
+list_installed_formula >"$tmpdir/ins_formula"
+list_installed_cask >"$tmpdir/ins_cask"
+list_installed_taps >"$tmpdir/ins_tap"
+brew leaves | sed '/^$/d' | sort -u >"$tmpdir/leaves"
+list_deprecated_formula >"$tmpdir/deprecated_formula"
+list_deprecated_cask >"$tmpdir/deprecated_cask"
+
+comm -23 "$tmpdir/bf_formula" "$tmpdir/ins_formula" >"$tmpdir/bf_formula_missing"
+comm -13 "$tmpdir/bf_formula" "$tmpdir/ins_formula" >"$tmpdir/installed_formula_untracked"
+comm -23 "$tmpdir/bf_cask" "$tmpdir/ins_cask" >"$tmpdir/bf_cask_missing"
+comm -13 "$tmpdir/bf_cask" "$tmpdir/ins_cask" >"$tmpdir/installed_cask_untracked"
+comm -23 "$tmpdir/bf_tap" "$tmpdir/ins_tap" >"$tmpdir/bf_tap_missing"
+comm -13 "$tmpdir/bf_tap" "$tmpdir/ins_tap" >"$tmpdir/installed_tap_untracked"
+comm -23 "$tmpdir/leaves" "$tmpdir/bf_formula" >"$tmpdir/leaves_untracked"
+
+bf_formula_count="$(wc -l < "$tmpdir/bf_formula" | tr -d ' ')"
+bf_cask_count="$(wc -l < "$tmpdir/bf_cask" | tr -d ' ')"
+bf_tap_count="$(wc -l < "$tmpdir/bf_tap" | tr -d ' ')"
+ins_formula_count="$(wc -l < "$tmpdir/ins_formula" | tr -d ' ')"
+ins_cask_count="$(wc -l < "$tmpdir/ins_cask" | tr -d ' ')"
+ins_tap_count="$(wc -l < "$tmpdir/ins_tap" | tr -d ' ')"
+
+cat <<SUMMARY
+Brew Audit
+==========
+Brewfile: $BREWFILE
+Brewfile counts: formulae=$bf_formula_count casks=$bf_cask_count taps=$bf_tap_count
+Installed counts: formulae=$ins_formula_count casks=$ins_cask_count taps=$ins_tap_count
+SUMMARY
+
+print_section "In Brewfile but not installed (formulae)" "$tmpdir/bf_formula_missing"
+print_section "Installed but not in Brewfile (formulae)" "$tmpdir/installed_formula_untracked"
+print_section "Leaf formulae not tracked in Brewfile" "$tmpdir/leaves_untracked"
+print_section "In Brewfile but not installed (casks)" "$tmpdir/bf_cask_missing"
+print_section "Installed but not in Brewfile (casks)" "$tmpdir/installed_cask_untracked"
+print_section "In Brewfile but not installed (taps)" "$tmpdir/bf_tap_missing"
+print_section "Installed but not in Brewfile (taps)" "$tmpdir/installed_tap_untracked"
+
+print_section "Deprecated/disabled installed formulae" "$tmpdir/deprecated_formula"
+print_section "Deprecated/disabled installed casks" "$tmpdir/deprecated_cask"
+
+echo
+echo "Tip: run 'brew bundle cleanup --file $BREWFILE --dry-run' to preview removals before uninstalling anything."

@@ -1,62 +1,75 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-. $HOME/.dotfiles/installs/utils/lib.sh
+set -euo pipefail
 
-export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+# shellcheck source=/dev/null
+. "$HOME/.dotfiles/installs/utils/lib.sh"
 
-# doesn't set right
-# Used with n node version manager
-export N_PREFIX="$HOME/.n"
-export PREFIX="$HOME/.n"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  export HOMEBREW_CASK_OPTS="--appdir=/Applications"
+fi
 
 info "checking for existing homebrew install"
-if test ! $(which brew)
-then
+if ! command -v brew >/dev/null 2>&1; then
   info "existing install not found, installing homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   success "installed homebrew"
 fi
-# fixme doesn't put brew into path so everything breaks
+
 info "updating homebrew"
 brew update
 success "updated homebrew"
 
-info "unalias mac git installation"
-unalias git
-info "list git aliases for verification:"
-alias | grep "git="
-success "alias removed"
-
-info "install brew git"
-brew install git
-info "list git location for verification:"
-which git
-success " git installed from brew"
-
-env | grep PREFIX
-# info "installing n(node version manager)"
-# brew install "n"
-# # this doesn't work
-# /bin/bash -c "$(n lts)"
-# success "installed n(node version manager)"
+info "installing homebrew bundle"
+brew install homebrew/bundle/brew-bundle
+success "installed homebrew bundle"
 
 info "installing rcm for dotfiles operations"
-brew install 'rcm'
+brew install rcm
 success "installed rcm"
 
-info "installing homebrew bundler"
-brew tap homebrew/bundle
-success "installed homebrew bundler"
-info "installing Brewfile packages. This might take a while..."
-brew bundle --file $HOME/.dotfiles/installs/homebrew/Brewfile
-info "uninstalling brew node version since we will use node version manager"
-brew uninstall node --ignore-dependencies
-success "installed homebrew bundler and Brewfile formulae"
-info "Java Versions/Locations:"
-/usr/libexec/java_home -V
-info "REMINDER: Install java versions to jenv: \n    e.g. 'jenv add /System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home'\n"
-info "REMINDER: Set npm global install directory to ~/.npm-global \n    npm config set prefix '~/.npm-global'\n"
-info "REMINDER: Run rcup for dotfiles: \n    env RCRC=$HOME/.dotfiles/rcrc rcup\n"
-info "To auto-update brew please run: brew autoupdate --start --upgrade --cleanup --enable-notification"
+info "installing Brewfile packages (this may take a while)"
+brew bundle --file "$HOME/.dotfiles/installs/homebrew/Brewfile"
+success "installed Brewfile packages"
+
+if brew list --formula node >/dev/null 2>&1; then
+  info "uninstalling brew node formula (nvm manages node/npm versions)"
+  brew uninstall node --ignore-dependencies
+fi
+
+if [[ -f "$HOME/.npmrc" ]] && grep -Eq '^\s*(prefix|globalconfig)\s*=' "$HOME/.npmrc"; then
+  warn "$HOME/.npmrc has prefix/globalconfig set; this conflicts with nvm-managed npm"
+  warn "remove those keys from $HOME/.npmrc, then run: nvm install 20 --latest-npm && nvm install 22 --latest-npm && nvm install 24 --latest-npm"
+else
+  info "configuring nvm in home directory"
+  export NVM_DIR="$HOME/.nvm"
+  mkdir -p "$NVM_DIR"
+
+  NVM_SH="$(brew --prefix nvm)/nvm.sh"
+  if [[ -s "$NVM_SH" ]]; then
+    # shellcheck source=/dev/null
+    source "$NVM_SH"
+  else
+    fail "unable to find nvm.sh at $NVM_SH"
+  fi
+
+  info "installing node majors for nvm: 20, 22, 24"
+  for node_major in 20 22 24; do
+    nvm install "$node_major" --latest-npm
+  done
+
+  info "setting nvm default node version to 24"
+  nvm alias default 24
+  nvm use default
+fi
+
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  info "java versions/locations"
+  /usr/libexec/java_home -V || true
+fi
+
+info "reminder: with nvm, do not set npm prefix/globalconfig in ~/.npmrc"
+info "reminder: run rcup for dotfiles: env RCRC=$HOME/.dotfiles/rcrc rcup"
+info "to auto-update brew: brew autoupdate --start --upgrade --cleanup --enable-notification"
 
 success "finished homebrew setup"

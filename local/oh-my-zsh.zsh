@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-#ZSH_THEME="powerlevel10k/powerlevel10k"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Choose between one [code, code-insiders or codium]
 # The following line will make the plugin to open VS Code Insiders
@@ -75,23 +75,30 @@ DISABLE_UPDATE_PROMPT="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(
-  aws
-  ansible
-  git
-  brew
-  copypath
-  copyfile
-  copybuffer
-  helm
-  jsontools
-  kubectl
-  node
-  npm
-  vscode
-)
+plugins=(git)
 
-source $ZSH/oh-my-zsh.sh
+if [[ "${DOTFILES_PLATFORM:-}" == "mac" ]]; then
+  plugins+=(copypath copyfile copybuffer)
+fi
+
+# Opt-in only.
+if [[ "${DOTFILES_ENABLE_OMZ_AWS_PLUGIN:-0}" == "1" ]]; then
+  command -v aws >/dev/null 2>&1 && plugins+=(aws)
+fi
+
+command -v ansible >/dev/null 2>&1 && plugins+=(ansible)
+command -v brew >/dev/null 2>&1 && plugins+=(brew)
+command -v node >/dev/null 2>&1 && plugins+=(node)
+command -v npm >/dev/null 2>&1 && plugins+=(npm)
+(command -v code >/dev/null 2>&1 || command -v code-insiders >/dev/null 2>&1 || command -v codium >/dev/null 2>&1) && plugins+=(vscode)
+
+# Opt-in only: keep these disabled unless explicitly enabled.
+if [[ "${DOTFILES_ENABLE_OMZ_K8S_PLUGINS:-0}" == "1" ]]; then
+  command -v helm >/dev/null 2>&1 && plugins+=(helm)
+  command -v kubectl >/dev/null 2>&1 && plugins+=(kubectl)
+fi
+
+[[ -r "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # User configuration
 

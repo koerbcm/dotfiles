@@ -73,7 +73,6 @@ Put your customizations in `~/dotfiles-local` appended with `.local`:
   throwing an error, but you should overwrite the file with your own copy)
 * `~/dotfiles-local/tmux.conf.local`
 * `~/dotfiles-local/vimrc.local`
-* `~/dotfiles-local/vimrc.bundles.local`
 * `~/dotfiles-local/zshrc.local`
 * `~/dotfiles-local/zsh/configs/*`
 
@@ -99,24 +98,6 @@ Your `~/dotfiles-local/vimrc.local` might look like this:
     highlight NonText guibg=#060606
     highlight Folded  guibg=#0A0A0A guifg=#9090D0
 
-If you don't wish to install a vim plugin from the default set of vim plugins in
-`.vimrc.bundles`, you can ignore the plugin by calling it out with `UnPlug` in
-your `~/.vimrc.bundles.local`.
-
-    " Don't install vim-scripts/tComment
-    UnPlug 'tComment'
-
-`UnPlug` can be used to install your own fork of a plugin or to install a shared
-plugin with different custom options.
-
-    " Only load vim-coffee-script if a Coffeescript buffer is created
-    UnPlug 'vim-coffee-script'
-    Plug 'kchmck/vim-coffee-script', { 'for': 'coffee' }
-
-    " Use a personal fork of vim-run-interactive
-    UnPlug 'vim-run-interactive'
-    Plug '$HOME/plugins/vim-run-interactive'
-
 To extend your `git` hooks, create executable scripts in
 `~/dotfiles-local/git_template.local/hooks/*` files.
 
@@ -126,11 +107,6 @@ Your `~/dotfiles-local/zshrc.local` might look like this:
     if which pyenv &>/dev/null ; then
       eval "$(pyenv init -)"
     fi
-
-Your `~/dotfiles-local/vimrc.bundles.local` might look like this:
-
-    Plug 'Lokaltog/vim-powerline'
-    Plug 'stephenmckinney/vim-solarized-powerline'
 
 zsh Configurations
 ------------------
@@ -181,20 +157,12 @@ What's in it?
 
 [vim](http://www.vim.org/) configuration:
 
-* [fzf](https://github.com/junegunn/fzf.vim) for fuzzy file/buffer/tag finding.
-* [Rails.vim](https://github.com/tpope/vim-rails) for enhanced navigation of
-  Rails file structure via `gf` and `:A` (alternate), `:Rextract` partials,
-  `:Rinvert` migrations, etc.
-* Run many kinds of tests [from vim]([https://github.com/janko-m/vim-test)
 * Set `<leader>` to a single space.
 * Switch between the last two files with space-space.
 * Syntax highlighting for Markdown, HTML, JavaScript, Ruby, Go, Elixir, more.
 * Use [Ag](https://github.com/ggreer/the_silver_searcher) instead of Grep when
   available.
 * Map `<leader>ct` to re-index ctags.
-* Use [vim-mkdir](https://github.com/pbrisbin/vim-mkdir) for automatically
-  creating non-existing directories before writing the buffer.
-* Use [vim-plug](https://github.com/junegunn/vim-plug) to manage plugins.
 
 [tmux](http://robots.thoughtbot.com/a-tmux-crash-course)
 configuration:
