@@ -57,6 +57,44 @@ configuration options:
 * Please configure the `rcrc` file if you'd like to make personal
   overrides in a different directory
 
+Context (work/personal)
+-----------------------
+
+Set shell context per machine in `~/.dotfiles-context.local`:
+
+    export DOTFILES_CONTEXT=work
+    # Optional:
+    # export DOTFILES_ENABLE_OMZ_K8S_PLUGINS=1
+    # export DOTFILES_ENABLE_OMZ_AWS_PLUGIN=1
+
+Reload shell config after changes:
+
+    source ~/.zshrc
+
+Defaults when unset:
+
+* `DOTFILES_CONTEXT=personal`
+* `DOTFILES_ENABLE_OMZ_K8S_PLUGINS=1` only for `work + mac`, otherwise `0`
+* `DOTFILES_ENABLE_OMZ_AWS_PLUGIN=0` (opt-in)
+
+Git identity and credentials
+----------------------------
+
+Set git identity in an untracked per-machine file:
+
+    cat > ~/.gitconfig.identity.local <<'EOF'
+    [user]
+      name = Your Name
+      email = you@example.com
+    EOF
+
+This repository's `~/.gitconfig.local` includes `~/.gitconfig.identity.local`,
+so your identity stays out of the dotfiles repo.
+
+Authenticate git/GitHub separately on each machine:
+
+    gh auth login
+
 Update
 ------
 
@@ -98,9 +136,6 @@ Your `~/dotfiles-local/gitconfig.local` might look like this:
       l = log --pretty=colored
     [pretty]
       colored = format:%Cred%h%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset
-    [user]
-      name = Dan Croak
-      email = dan@thoughtbot.com
 
 Your `~/dotfiles-local/vimrc.local` might look like this:
 
