@@ -2,3 +2,5 @@
 vim/bundle/
 Brewfile
 !installs/homebrew/Brewfile
+
+.codex

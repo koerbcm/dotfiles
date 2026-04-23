@@ -106,6 +106,26 @@ to link any new files and install new vim plugins. **Note** You _must_ run
 `rcup` after pulling to ensure that all files in plugins are properly installed,
 but you can safely run `rcup` multiple times so update early and update often!
 
+Remote Alias Sync
+-----------------
+
+Use `aliases.remote` for aliases that should be shared to SSH hosts.
+
+Upload to one or more hosts:
+
+    ssh-sync-aliases user@host-a user@host-b
+
+By default this uploads to `~/.aliases.remote` and ensures both `~/.bashrc` and
+`~/.zshrc` source it idempotently. If you only want to upload the file:
+
+    ssh-sync-aliases --no-shell-hook user@host-a
+
+Quick-connect helper:
+
+    ssha user@host-a
+
+`ssha` syncs `aliases.remote` first, then runs `ssh`.
+
 Make your own customizations
 ----------------------------
 

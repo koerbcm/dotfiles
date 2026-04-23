@@ -1,0 +1,45 @@
+# Sync portable aliases before opening an SSH session.
+# Usage: ssha [ssh options] <target> [command]
+
+_dotfiles_extract_ssh_target() {
+  local _arg
+  local _consume_next=0
+
+  for _arg in "$@"; do
+    if [[ "$_consume_next" == "1" ]]; then
+      _consume_next=0
+      continue
+    fi
+
+    case "$_arg" in
+      -b|-c|-D|-E|-e|-F|-I|-i|-J|-L|-l|-m|-O|-o|-p|-Q|-R|-S|-W|-w)
+        _consume_next=1
+        ;;
+      --)
+        ;;
+      -*)
+        ;;
+      *)
+        print -r -- "$_arg"
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+function ssha() {
+  local _target
+
+  _target="$(_dotfiles_extract_ssh_target "$@" 2>/dev/null)" || {
+    echo "usage: ssha [ssh options] <target> [command]" >&2
+    return 1
+  }
+
+  if command -v ssh-sync-aliases >/dev/null 2>&1; then
+    ssh-sync-aliases "$_target" >/dev/null 2>&1 || true
+  fi
+
+  command ssh "$@"
+}

@@ -1,0 +1,32 @@
+# Portable aliases for remote hosts.
+# This file is intended to be copied to ~/.aliases.remote on SSH targets.
+# Keep this shell-agnostic so it works in both bash and zsh.
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Cross-platform ls aliases
+if command -v ls >/dev/null 2>&1; then
+  if ls --color=auto >/dev/null 2>&1; then
+    alias ls='ls -h --color=auto --group-directories-first'
+    alias l='ls -lAhp --color=auto --group-directories-first'
+    alias ll='ls -lhp --color=auto --group-directories-first'
+    alias la='ls -Alhp --color=auto --group-directories-first'
+  else
+    alias ls='ls -h'
+    alias l='ls -lAhp'
+    alias ll='ls -lhp'
+    alias la='ls -Alhp'
+  fi
+fi
+
+alias c='clear'
+alias clr='clear'
+alias cls='clear && ls'
+
+alias path='echo "$PATH" | tr ":" "\\n"'
+
+command -v git >/dev/null 2>&1 && alias g='git'
+command -v kubectl >/dev/null 2>&1 && alias k='kubectl'
+command -v vim >/dev/null 2>&1 && alias vi='vim'

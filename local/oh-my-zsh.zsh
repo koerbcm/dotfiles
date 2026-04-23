@@ -8,7 +8,12 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="powerlevel10k/powerlevel10k"
+if [[ -r "${ZSH_CUSTOM:-$ZSH/custom}/themes/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  ZSH_THEME="powerlevel10k/powerlevel10k"
+else
+  # Avoid startup warnings on machines where powerlevel10k isn't installed.
+  ZSH_THEME="robbyrussell"
+fi
 
 # Choose between one [code, code-insiders or codium]
 # The following line will make the plugin to open VS Code Insiders

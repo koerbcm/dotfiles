@@ -1,0 +1,116 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'USAGE'
+Usage: ssh-sync-aliases [options] <target> [target...]
+
+Uploads aliases.remote to each SSH target and (by default) ensures
+~/.bashrc and ~/.zshrc source ~/.aliases.remote.
+
+Options:
+  --no-shell-hook      Upload only; do not modify remote shell rc files
+  -f, --file <path>    Local aliases file to upload (default: aliases.remote)
+  -r, --remote <path>  Remote aliases path (default: .aliases.remote)
+  -h, --help           Show this help
+USAGE
+}
+
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+dotfiles_dir=$(CDPATH= cd -- "$script_dir/.." && pwd)
+
+local_file="$dotfiles_dir/aliases.remote"
+remote_file=".aliases.remote"
+install_shell_hook=1
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --no-shell-hook)
+      install_shell_hook=0
+      shift
+      ;;
+    -f|--file)
+      [ "$#" -gt 1 ] || { echo "missing value for $1" >&2; exit 1; }
+      local_file="$2"
+      shift 2
+      ;;
+    -r|--remote)
+      [ "$#" -gt 1 ] || { echo "missing value for $1" >&2; exit 1; }
+      remote_file="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    -*)
+      echo "unknown option: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+[ "$#" -gt 0 ] || {
+  usage >&2
+  exit 1
+}
+
+[ -r "$local_file" ] || {
+  echo "aliases file not found or unreadable: $local_file" >&2
+  exit 1
+}
+
+for target in "$@"; do
+  echo "==> Syncing aliases to $target"
+  scp -q "$local_file" "$target:$remote_file"
+
+  if [ "$install_shell_hook" -eq 1 ]; then
+    ssh "$target" sh -s -- "$remote_file" <<'REMOTE_SH'
+set -eu
+
+remote_aliases="$1"
+
+case "$remote_aliases" in
+  /*)
+    source_line="[ -r \"$remote_aliases\" ] && . \"$remote_aliases\""
+    ;;
+  *)
+    source_line="[ -r \"\$HOME/$remote_aliases\" ] && . \"\$HOME/$remote_aliases\""
+    ;;
+esac
+
+install_source_hook() {
+  rc_file="$1"
+  marker_begin="# >>> dotfiles remote aliases >>>"
+  marker_end="# <<< dotfiles remote aliases <<<"
+
+  [ -f "$rc_file" ] || touch "$rc_file"
+
+  if grep -F "$marker_begin" "$rc_file" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  {
+    echo
+    echo "$marker_begin"
+    echo "$source_line"
+    echo "$marker_end"
+  } >> "$rc_file"
+}
+
+install_source_hook "$HOME/.bashrc"
+install_source_hook "$HOME/.zshrc"
+REMOTE_SH
+  fi
+
+done
+
+echo "Done."
