@@ -228,7 +228,6 @@ What's in it?
 * Syntax highlighting for Markdown, HTML, JavaScript, Ruby, Go, Elixir, more.
 * Use [Ag](https://github.com/ggreer/the_silver_searcher) instead of Grep when
   available.
-* Map `<leader>ct` to re-index ctags.
 
 [tmux](http://robots.thoughtbot.com/a-tmux-crash-course)
 configuration:
@@ -245,7 +244,6 @@ configuration:
 * Adds a `merge-branch` alias to merge feature branches into master.
 * Adds an `up` alias to fetch and rebase `origin/master` into the feature
   branch. Use `git up -i` for interactive rebases.
-* Adds `post-{checkout,commit,merge}` hooks to re-index your ctags.
 * Adds `pre-commit` and `prepare-commit-msg` stubs that delegate to your local
   config.
 * Adds `trust-bin` alias to append a project's `bin/` directory to `$PATH`.
