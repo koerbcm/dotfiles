@@ -19,9 +19,6 @@ esac
 
 export DOTFILES_CONTEXT
 
-# Plugin policy defaults
-# - K8s plugins enabled by default only on work mac.
-# - AWS plugin is opt-in everywhere.
 _dotfiles_platform="${DOTFILES_PLATFORM:-${OS:-}}"
 if [[ -z "$_dotfiles_platform" ]]; then
   case "$(uname -s 2>/dev/null | tr '[:upper:]' '[:lower:]')" in
@@ -31,6 +28,19 @@ if [[ -z "$_dotfiles_platform" ]]; then
   esac
 fi
 
+# Profile environment overlays (context/platform + optional home-local).
+for _overlay in \
+  "$DOTFILES/local/profiles/${DOTFILES_CONTEXT}.env.zsh" \
+  "$DOTFILES/local/profiles/${_dotfiles_platform}.env.zsh" \
+  "$HOME/.env.${DOTFILES_CONTEXT}.local" \
+  "$HOME/.env.${_dotfiles_platform}.local"; do
+  [[ -r "$_overlay" ]] && source "$_overlay"
+done
+unset _overlay
+
+# Plugin policy defaults
+# - K8s plugins enabled by default only on work mac.
+# - AWS plugin is opt-in everywhere.
 if [[ -z "${DOTFILES_ENABLE_OMZ_K8S_PLUGINS:-}" ]]; then
   if [[ "${DOTFILES_CONTEXT}" == "work" && "$_dotfiles_platform" == "mac" ]]; then
     export DOTFILES_ENABLE_OMZ_K8S_PLUGINS=1

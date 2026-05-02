@@ -19,6 +19,84 @@ fi
 
 info "detected platform: $DOTFILES_INSTALL_PLATFORM"
 
+declare -a DOTFILES_CREATED_TEMPLATE_FILES=()
+declare -a DOTFILES_CREATED_TEMPLATE_DETAILS=()
+
+create_template_if_missing() {
+  local target_path="$1"
+  local purpose="$2"
+  local template_body="$3"
+
+  if [[ -e "$target_path" ]]; then
+    return 0
+  fi
+
+  printf "%s\n" "$template_body" > "$target_path"
+  DOTFILES_CREATED_TEMPLATE_FILES+=("$target_path")
+  DOTFILES_CREATED_TEMPLATE_DETAILS+=("$target_path|$purpose")
+  info "created template: $target_path"
+}
+
+ensure_required_local_templates() {
+  create_template_if_missing \
+    "$HOME/.dotfiles-context.local" \
+    "Per-machine shell context and optional plugin overrides." \
+'# Untracked per-machine dotfiles context.
+# Valid context values: work or personal.
+export DOTFILES_CONTEXT=personal
+
+# Optional plugin overrides (uncomment if needed):
+# export DOTFILES_ENABLE_OMZ_K8S_PLUGINS=1
+# export DOTFILES_ENABLE_OMZ_AWS_PLUGIN=1'
+
+  create_template_if_missing \
+    "$HOME/.gitconfig.identity.local" \
+    "Git user identity for commits on this machine." \
+'# Untracked per-machine git identity.
+[user]
+  name = Your Name
+  email = you@example.com'
+
+  create_template_if_missing \
+    "$HOME/.gitconfig.machine.local" \
+    "Optional machine-specific git include routing." \
+'# Untracked machine-specific git include rules.
+# Example: route a workspace to a work-only config.
+# [includeIf "gitdir:/Users/your-user/workspace/"]
+#   path = .gitconfig-work.local'
+
+  create_template_if_missing \
+    "$HOME/.localrc" \
+    "Shell secrets and machine-local environment variables." \
+'# Untracked local shell variables and secrets.
+# Keep real tokens/passwords out of tracked dotfiles.
+#
+# Examples:
+# export SOME_API_TOKEN="replace-me"
+# export SOME_SERVICE_URL="https://example.internal"'
+
+  chmod 600 \
+    "$HOME/.dotfiles-context.local" \
+    "$HOME/.gitconfig.identity.local" \
+    "$HOME/.gitconfig.machine.local" \
+    "$HOME/.localrc" 2>/dev/null || true
+}
+
+print_required_template_followup() {
+  if [[ ${#DOTFILES_CREATED_TEMPLATE_FILES[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  warn "action required: created local setup template files"
+  for detail in "${DOTFILES_CREATED_TEMPLATE_DETAILS[@]}"; do
+    local path="${detail%%|*}"
+    local purpose="${detail#*|}"
+    warn "  - $path"
+    warn "    purpose: $purpose"
+  done
+  warn "update these files with your real values before continuing setup."
+}
+
 source_nvm() {
   export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
   mkdir -p "$NVM_DIR"
@@ -138,6 +216,8 @@ fi
 
 install_nvm_nodes
 
+ensure_required_local_templates
+
 if ! command -v rcup >/dev/null 2>&1; then
   if [[ "$DOTFILES_INSTALL_PLATFORM" == "linux" || "$DOTFILES_INSTALL_PLATFORM" == "wsl" ]]; then
     warn "rcup is not installed; install rcm via your distro package manager (example: sudo apt-get install -y rcm)"
@@ -151,5 +231,7 @@ info "reminder: run rcup for dotfiles: env RCRC=$HOME/.dotfiles/rcrc rcup"
 if [[ "$DOTFILES_INSTALL_PLATFORM" == "mac" ]]; then
   info "to auto-update brew: brew autoupdate --start --upgrade --cleanup --enable-notification"
 fi
+
+print_required_template_followup
 
 success "finished installer setup"

@@ -130,7 +130,7 @@ _dotfiles_find_node_marker() {
   local _marker
 
   while [[ -n "$_dir" && "$_dir" != "/" ]]; do
-    for _marker in .nvmrc .node-version .n-node-version; do
+    for _marker in .nvmrc .node-version; do
       if [[ -f "$_dir/$_marker" ]]; then
         print -r -- "$_dir/$_marker"
         return 0

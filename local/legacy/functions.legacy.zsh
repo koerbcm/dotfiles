@@ -182,7 +182,7 @@ chpwd() {
 
   if command -v n &> /dev/null; then
     # if version file is found and using n, automatically change node version
-    if [[ -f ./.n-node-version ]] || [[ -f ./.node-version ]] || [[ -f ./.nvmrc ]] || [[ -f ./package.json ]]
+    if [[ -f ./.node-version ]] || [[ -f ./.nvmrc ]] || [[ -f ./package.json ]]
     then
       echo "\nUpdating Node Version...\n"
       n auto

@@ -24,6 +24,17 @@ Run the bootstrap installer:
 
     bash ~/.dotfiles/installs/homebrew/install.sh
 
+On first run, the installer now creates these untracked local template files if
+they are missing:
+
+* `~/.dotfiles-context.local`
+* `~/.gitconfig.identity.local`
+* `~/.gitconfig.machine.local`
+* `~/.localrc`
+
+The installer prints an explicit action-required reminder when it creates any of
+them. Fill in real values before continuing with setup.
+
 Behavior by platform:
 
 * macOS: installs/updates Homebrew, applies `installs/homebrew/Brewfile`, and configures nvm.
@@ -77,6 +88,13 @@ Defaults when unset:
 * `DOTFILES_ENABLE_OMZ_K8S_PLUGINS=1` only for `work + mac`, otherwise `0`
 * `DOTFILES_ENABLE_OMZ_AWS_PLUGIN=0` (opt-in)
 
+Profile env overlays for exports:
+
+* `local/profiles/<context>.env.zsh`
+* `local/profiles/<platform>.env.zsh`
+* `~/.env.<context>.local` (untracked)
+* `~/.env.<platform>.local` (untracked)
+
 Git identity and credentials
 ----------------------------
 
@@ -90,6 +108,18 @@ Set git identity in an untracked per-machine file:
 
 This repository's `~/.gitconfig.local` includes `~/.gitconfig.identity.local`,
 so your identity stays out of the dotfiles repo.
+
+For machine-specific routing (for example work identity under
+`/Users/ckoerber/workspace/` on a work Mac), add an untracked
+`~/.gitconfig.machine.local`:
+
+    [includeIf "gitdir:/Users/ckoerber/workspace/"]
+      path = .gitconfig-work.local
+
+Keep `~/.gitconfig.identity.local`, `~/.gitconfig.machine.local`, and
+`~/.gitconfig-work.local` out of committed dotfiles content. The separation is
+intentional so personal/work emails and machine-only rules are not exposed in
+the shared repo.
 
 Authenticate git/GitHub separately on each machine:
 

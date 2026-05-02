@@ -1,8 +1,8 @@
 [include]
   path = ~/.gitconfig.identity.local
 
-[includeIf "gitdir:/Users/ckoerber/workspace/"]
-  path = .gitconfig-work.local
+[include]
+  path = ~/.gitconfig.machine.local
 
 # this might be used to point brew to use ssh
 # [url "git@github.com:"]

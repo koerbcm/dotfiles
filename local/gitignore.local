@@ -28,6 +28,4 @@ schema/*
 .node-version
 .nvmrc
 .scannerwork
-.n-node-version
-
 .java-version

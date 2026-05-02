@@ -37,9 +37,12 @@ Default plugin policy (from repo config):
 - Secrets/private tokens:
   - `~/.localrc` (or other untracked home-local files)
 - Context/platform overlays (tracked):
+  - `local/profiles/*.env.zsh`
   - `local/profiles/*.aliases.zsh`
   - `local/profiles/*.functions.zsh`
 - Optional personal overlays (untracked):
+  - `~/.env.<context>.local`
+  - `~/.env.<platform>.local`
   - `~/.aliases.<context>.local`
   - `~/.functions.<context>.local`
   - `~/.aliases.<platform>.local`
